@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Wire Transfer Receipt - Professional PDF Generator</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f8;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            padding: 30px 20px;
+        }
+
+        /* Main Layout */
+        .app-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Editor Panel */
+        .editor-section {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0a2b4e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #2c3e66;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-row input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-row input:focus {
+            outline: none;
+            border-color: #0a5b8c;
+            box-shadow: 0 0 0 3px rgba(10,91,140,0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-pdf {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            flex: 1;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-pdf:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .btn-refresh {
+            background: #e9ecef;
+            color: #1e3a5f;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .btn-refresh:hover {
+            background: #dce3ec;
+        }
+
+        /* ========== RECEIPT STYLES - SIMPLE, RELIABLE, TABLE-BASED ========== */
+        /* This receipt is what gets captured for PDF - using simple table layout */
+        .receipt-wrapper {
+            flex: 1.4;
+            min-width: 450px;
+        }
+
+        .receipt-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* The actual receipt that will be converted to PDF */
+        .receipt-for-pdf {
+            background: white;
+            padding: 40px 35px;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            max-width: 100%;
+        }
+
+        /* Simple table layout for guaranteed PDF rendering */
+        .receipt-for-pdf table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .receipt-for-pdf .header-section {
+            border-bottom: 2px solid #e0e6ed;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .receipt-for-pdf .bank-name {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0a2b4e;
+            margin: 0;
+        }
+
+        .receipt-for-pdf .bank-tagline {
+            font-size: 11px;
+            color: #6c7e9e;
+            margin-top: 5px;
+        }
+
+        .receipt-for-pdf .status-pending {
+            background: #fff3e0;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #c26b1a;
+        }
+
+        .receipt-for-pdf .message-box {
+            background: #eef6fc;
+            padding: 14px 18px;
+            border-left: 4px solid #0a5b8c;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #0a5b8c;
+        }
+
+        .receipt-for-pdf .info-box {
+            background: #f8f9fc;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            margin: 18px 0;
+            font-size: 12px;
+            color: #4a5b7a;
+        }
+
+        /* Details Table */
+        .receipt-for-pdf .details-table {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .receipt-for-pdf .details-table tr {
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .receipt-for-pdf .details-table td {
+            padding: 12px 8px 12px 0;
+            vertical-align: top;
+        }
+
+        .receipt-for-pdf .label-cell {
+            width: 170px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #1e3a5f;
+            letter-spacing: 0.3px;
+        }
+
+        .receipt-for-pdf .value-cell {
+            font-weight: 500;
+            font-size: 14px;
+            color: #0f2b3f;
+            word-break: break-word;
+        }
+
+        .receipt-for-pdf .amount-highlight {
+            font-weight: 800;
+            color: #0a4b6e;
+            font-size: 16px;
+        }
+
+        .receipt-for-pdf .fee-note {
+            background: #fef7e0;
+            padding: 12px 18px;
+            margin: 20px 0;
+            border-left: 3px solid #e6a017;
+            font-size: 12px;
+        }
+
+        .receipt-for-pdf .delivery-section {
+            background: #fafcff;
+            border: 1px solid #eef2fa;
+            padding: 16px 20px;
+            margin: 20px 0;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .receipt-for-pdf .delivery-item {
+            flex: 1;
+        }
+
+        .receipt-for-pdf .delivery-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6c7f9c;
+        }
+
+        .receipt-for-pdf .delivery-value {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: #1a344d;
+        }
+
+        .receipt-for-pdf .beneficiary-box {
+            background: #f8fafd;
+            border-left: 3px solid #0a5b8c;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .receipt-for-pdf .beneficiary-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #516e8f;
+        }
+
+        .receipt-for-pdf .beneficiary-content {
+            font-family: monospace;
+            font-size: 13px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .receipt-for-pdf .watermark {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ecf3fa;
+            font-size: 10px;
+            color: #8da1bc;
+        }
+
+        @media (max-width: 900px) {
+            .app-wrapper {
+                flex-direction: column;
+            }
+            .editor-section {
+                position: static;
+            }
+            .receipt-wrapper {
+                min-width: auto;
+            }
+            .receipt-for-pdf {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <!-- EDITOR PANEL -->
+    <div class="editor-section">
+        <div class="editor-title">
+            <i class="fas fa-pen-ruler"></i> Edit Receipt Information
+        </div>
+        
+        <div class="form-row">
+            <label><i class="fas fa-university"></i> Bank Name</label>
+            <input type="text" id="bankName" value="Bank of America">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-user"></i> Account Holder Name</label>
+            <input type="text" id="accountName" value="MEVADA DEELIPKUMAR SHANKARBHAI">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-credit-card"></i> Account Number</label>
+            <input type="text" id="accountNumber" value="50100700028722">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-exchange-alt"></i> Send To (Bank)</label>
+            <input type="text" id="sendToBank" value="HDFC Bank LTD">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-dollar-sign"></i> Transfer Amount (USD)</label>
+            <input type="number" id="amount" value="12000" step="100">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-id-card"></i> From Account (Debit)</label>
+            <input type="text" id="fromAccount" value="CHECKING ...0985">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-calendar-alt"></i> Send On</label>
+            <input type="text" id="sendOn" value="07/07/2025, 6:30AM">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-clock"></i> Deliver By</label>
+            <input type="text" id="deliverBy" value="14/07/2025, 4:40PM">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-user-check"></i> Beneficiary Name</label>
+            <input type="text" id="beneficiaryName" value="ORLANDO MICHAEL">
+        </div>
+        <div class="form-row">
+            <label><i class="fas fa-hashtag"></i> Beneficiary Account</label>
+            <input type="text" id="beneficiaryAccount" value="0829020985">
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn-pdf" id="downloadPdfBtn">
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </button>
+            <button class="btn-refresh" id="refreshBtn">
+                <i class="fas fa-eye"></i> Refresh Preview
+            </button>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 12px; background: #f0f4f9; border-radius: 12px; font-size: 11px; color: #2c5a7a;">
+            <i class="fas fa-shield-alt"></i> <strong>Privacy Protected:</strong> Available balance is completely omitted from the receipt.
+        </div>
+    </div>
+
+    <!-- RECEIPT PREVIEW -->
+    <div class="receipt-wrapper">
+        <div class="receipt-container">
+            <div id="receiptContent" class="receipt-for-pdf">
+                <!-- Content will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper functions
+    function formatUSD(value) {
+        let num = parseFloat(value);
+        if (isNaN(num)) num = 0;
+        return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function computeFee(amount) {
+        return amount * 0.03;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Get all current values
+    function getFormValues() {
+        return {
+            bankName: document.getElementById('bankName').value.trim() || 'Bank of America',
+            accountName: document.getElementById('accountName').value.trim() || 'MEVADA DEELIPKUMAR SHANKARBHAI',
+            accountNumber: document.getElementById('accountNumber').value.trim() || '50100700028722',
+            sendToBank: document.getElementById('sendToBank').value.trim() || 'HDFC Bank LTD',
+            amount: parseFloat(document.getElementById('amount').value) || 12000,
+            fromAccount: document.getElementById('fromAccount').value.trim() || 'CHECKING ...0985',
+            sendOn: document.getElementById('sendOn').value.trim() || '07/07/2025, 6:30AM',
+            deliverBy: document.getElementById('deliverBy').value.trim() || '14/07/2025, 4:40PM',
+            beneficiaryName: document.getElementById('beneficiaryName').value.trim() || 'ORLANDO MICHAEL',
+            beneficiaryAccount: document.getElementById('beneficiaryAccount').value.trim() || '0829020985',
+            confirmationNumber: 'OWD00000422757199',
+            frequency: 'ONE WEEK – (7DAYS)',
+            submissionMsg: 'You have successfully submitted your transaction on 18/09/2024 at 2:30am USA Time'
+        };
+    }
+    
+    // Build the receipt HTML (simple table-based for reliable PDF rendering)
+    function buildReceiptHTML(data) {
+        const feeAmount = computeFee(data.amount);
+        
+        return `
+            <table style="width:100%;">
+                <!-- Header -->
+                <tr>
+                    <td style="padding-bottom:20px; border-bottom:2px solid #e0e6ed;">
+                        <div>
+                            <div class="bank-name">${escapeHtml(data.bankName)}</div>
+                            <div class="bank-tagline">Wire Transfer · Secure Confirmation</div>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <span class="status-pending"><i class="fas fa-clock"></i> pending...</span>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Success message -->
+                <tr>
+                    <td>
+                        <div class="message-box">
+                            <i class="fas fa-check-circle"></i> ${escapeHtml(data.submissionMsg)}
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Cancel info -->
+                <tr>
+                    <td>
+                        <div class="info-box">
+                            <i class="fas fa-exchange-alt"></i> You can cancel your wire transfer within 30 minutes of confirming the transaction, view your pending wire transfers, or send another wire transfer.
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Wire Details Table - NO AVAILABLE BALANCE ROW -->
+                <tr>
+                    <td>
+                        <table class="details-table" style="width:100%;">
+                            <tr>
+                                <td class="label-cell">Account Name</td>
+                                <td class="value-cell"><strong>${escapeHtml(data.accountName)}</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Account Number</td>
+                                <td class="value-cell">${escapeHtml(data.accountNumber)}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Confirmation Number</td>
+                                <td class="value-cell">${escapeHtml(data.confirmationNumber)}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Send To</td>
+                                <td class="value-cell">${escapeHtml(data.sendToBank)}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">From Account (Debit)</td>
+                                <td class="value-cell">${escapeHtml(data.fromAccount)}</td>
+                            </tr>
+                            <!-- AVAILABLE BALANCE ROW IS COMPLETELY OMITTED -->
+                            <tr>
+                                <td class="label-cell">Amount</td>
+                                <td class="value-cell amount-highlight">${formatUSD(data.amount)} USD</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Frequency</td>
+                                <td class="value-cell">${escapeHtml(data.frequency)}</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell">Wire Currency</td>
+                                <td class="value-cell">US Dollar (USD) <span style="font-size:11px;">(transfer being sent in USD)</span></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                
+                <!-- Fee Note -->
+                <tr>
+                    <td>
+                        <div class="fee-note">
+                            <i class="fas fa-percent"></i> 
+                            <strong>NOTE:</strong> In order for this international transfer to be completed, a charge fee of 3% of the transferred amount (${formatUSD(feeAmount)}) would be paid.
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Delivery Timeline -->
+                <tr>
+                    <td>
+                        <div class="delivery-section">
+                            <div class="delivery-item">
+                                <div class="delivery-label"><i class="far fa-calendar-alt"></i> Send on</div>
+                                <div class="delivery-value">${escapeHtml(data.sendOn)}</div>
+                            </div>
+                            <div class="delivery-item">
+                                <div class="delivery-label"><i class="far fa-clock"></i> Deliver by</div>
+                                <div class="delivery-value">${escapeHtml(data.deliverBy)}</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Beneficiary Description -->
+                <tr>
+                    <td>
+                        <div class="beneficiary-box">
+                            <div class="beneficiary-title"><i class="fas fa-info-circle"></i> Description / Beneficiary Details</div>
+                            <div class="beneficiary-content">
+                                ACCOUNT NAME: ${escapeHtml(data.beneficiaryName)}<br>
+                                ACCOUNT NUMBER: ${escapeHtml(data.beneficiaryAccount)}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                
+                <!-- Watermark -->
+                <tr>
+                    <td>
+                        <div class="watermark">
+                            <i class="far fa-credit-card"></i> Confirmation: ${escapeHtml(data.confirmationNumber)}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+    
+    // Update the preview
+    function updatePreview() {
+        const data = getFormValues();
+        const receiptHTML = buildReceiptHTML(data);
+        document.getElementById('receiptContent').innerHTML = receiptHTML;
+    }
+    
+    // Generate PDF using html2canvas + jsPDF (more reliable than html2pdf)
+    async function generatePDF() {
+        // First update preview to ensure latest data
+        updatePreview();
+        
+        // Wait a moment for DOM to fully render
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const element = document.getElementById('receiptContent');
+        
+        // Show loading state on button
+        const btn = document.getElementById('downloadPdfBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating PDF...';
+        btn.disabled = true;
+        
+        try {
+            // Capture the element as canvas with high quality
+            const canvas = await html2canvas(element, {
+                scale: 3,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            // Calculate PDF dimensions
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            let pdf = new jsPDF('p', 'mm', 'a4');
+            let position = 0;
+            
+            // Add image to PDF
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            
+            // If content exceeds one page, add another page
+            if (imgHeight > pageHeight) {
+                let heightLeft = imgHeight - pageHeight;
+                position = -pageHeight;
+                while (heightLeft > 0) {
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    position -= pageHeight;
+                }
+            }
+            
+            // Save the PDF
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            pdf.save(`Wire_Receipt_${timestamp}.pdf`);
+            
+        } catch (error) {
+            console.error('PDF generation error:', error);
+            alert('Error generating PDF. Please try again.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial render
+        updatePreview();
+        
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', updatePreview);
+        
+        // Download button
+        document.getElementById('downloadPdfBtn').addEventListener('click', generatePDF);
+        
+        // Auto-update on input changes
+        const inputs = ['bankName', 'accountName', 'accountNumber', 'sendToBank', 'amount', 
+                       'fromAccount', 'sendOn', 'deliverBy', 'beneficiaryName', 'beneficiaryAccount'];
+        
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            input.addEventListener('input', updatePreview);
+            input.addEventListener('change', updatePreview);
+        });
+    });
+</script>
+</body>
+</html>
